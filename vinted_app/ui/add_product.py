@@ -74,11 +74,12 @@ class AddProductFrame(ctk.CTkFrame):
             text="📊 Calculer Bénéfice Estimé",
             command=self._calculate_profit,
             fg_color=config.COLORS["info"],
-            hover_color="#1e5fb8",
+            hover_color="#0891B2",
             font=("Arial", 11, "bold"),
-            height=40
+            height=42,
+            corner_radius=8
         )
-        calc_btn.grid(row=0, column=0, sticky="ew", pady=5)
+        calc_btn.grid(row=0, column=0, sticky="ew", pady=8)
 
         # Label pour le bénéfice
         self.profit_label = ctk.CTkLabel(
@@ -87,22 +88,23 @@ class AddProductFrame(ctk.CTkFrame):
             font=("Arial", 12, "bold"),
             text_color=config.COLORS["accent"]
         )
-        self.profit_label.grid(row=1, column=0, sticky="w", pady=5)
+        self.profit_label.grid(row=1, column=0, sticky="w", pady=8)
 
         # Boutons d'action
         action_frame = ctk.CTkFrame(button_frame, fg_color="transparent")
-        action_frame.grid(row=2, column=0, sticky="ew", pady=(20, 0))
+        action_frame.grid(row=2, column=0, sticky="ew", pady=(25, 0))
         action_frame.grid_columnconfigure((0, 1), weight=1)
 
         reset_btn = ctk.CTkButton(
             action_frame,
             text="🔄 Réinitialiser",
             command=self._reset_form,
-            fg_color=config.COLORS["bg_secondary"],
-            hover_color=config.COLORS["bg_tertiary"],
+            fg_color=config.COLORS["bg_tertiary"],
+            hover_color=config.COLORS["bg_secondary"],
             text_color=config.COLORS["fg_text"],
             font=("Arial", 11, "bold"),
-            height=40
+            height=42,
+            corner_radius=8
         )
         reset_btn.grid(row=0, column=0, sticky="ew", padx=(0, 10))
 
@@ -111,21 +113,22 @@ class AddProductFrame(ctk.CTkFrame):
             text="✓ Ajouter Produit",
             command=self._add_product,
             fg_color=config.COLORS["success"],
-            hover_color="#1a9f3a",
+            hover_color="#059669",
             font=("Arial", 11, "bold"),
-            height=40
+            height=42,
+            corner_radius=8
         )
         add_btn.grid(row=0, column=1, sticky="ew", padx=(10, 0))
 
     def _create_form_field(self, parent, row, label, var_name, field_type="text", options=None):
-        """Crée un champ de formulaire"""
+        """Crée un champ de formulaire stylisé"""
         # Label
         ctk.CTkLabel(
             parent,
             text=label,
-            font=("Arial", 12, "bold"),
+            font=("Arial", 11, "bold"),
             text_color=config.COLORS["fg_text"]
-        ).grid(row=row, column=0, sticky="w", pady=(15, 5), padx=10)
+        ).grid(row=row, column=0, sticky="w", pady=(18, 8), padx=12)
 
         # Variable StringVar
         if not hasattr(self, f"{var_name}_var"):
@@ -139,17 +142,21 @@ class AddProductFrame(ctk.CTkFrame):
                 variable=getattr(self, f"{var_name}_var"),
                 fg_color=config.COLORS["bg_secondary"],
                 button_color=config.COLORS["accent"],
-                dropdown_fg_color=config.COLORS["bg_secondary"]
+                dropdown_fg_color=config.COLORS["bg_secondary"],
+                border_color=config.COLORS["bg_tertiary"],
+                border_width=1
             )
         else:
             entry = ctk.CTkEntry(
                 parent,
                 textvariable=getattr(self, f"{var_name}_var"),
                 fg_color=config.COLORS["bg_secondary"],
+                border_color=config.COLORS["bg_tertiary"],
+                border_width=1,
                 placeholder_text=label
             )
 
-        entry.grid(row=row, column=1, sticky="ew", pady=(15, 5), padx=10)
+        entry.grid(row=row, column=1, sticky="ew", pady=(18, 8), padx=12)
 
     def _calculate_profit(self):
         """Calcule le bénéfice estimé"""

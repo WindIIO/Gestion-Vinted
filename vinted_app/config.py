@@ -4,17 +4,45 @@ Configuration générale de l'application Vinted Stock Manager
 
 # ====== CONFIGURATION D'APPARENCE ======
 COLORS = {
-    "bg_primary": "#1a1a1a",      # Noir foncé
-    "bg_secondary": "#2d2d2d",    # Gris foncé
-    "bg_tertiary": "#3d3d3d",     # Gris moyen
-    "fg_text": "#ffffff",          # Blanc
-    "fg_text_secondary": "#b0b0b0", # Gris clair
-    "accent": "#0066FF",           # Bleu
-    "success": "#22C55E",          # Vert (vendu)
-    "warning": "#F59E0B",          # Orange (en vente)
-    "info": "#3B82F6",             # Bleu info
-    "danger": "#EF4444",           # Rouge
-    "neutral": "#6B7280"           # Gris neutre (stock)
+    # Backgrounds - Gradient modern dark
+    "bg_primary": "#0F1419",       # Noir très foncé (quasi noir)
+    "bg_secondary": "#1A1F2E",     # Gris bleu foncé
+    "bg_tertiary": "#252D3D",      # Gris bleu moyen
+    "bg_hover": "#323D52",         # Hover effect
+    
+    # Text colors
+    "fg_text": "#F8FAFC",          # Blanc pur (ultra clair)
+    "fg_text_secondary": "#94A3B8", # Gris clair
+    "fg_text_muted": "#64748B",    # Gris moyen
+    
+    # Status colors - Modern vibrant
+    "success": "#10B981",          # Vert émeraude (vendu)
+    "warning": "#F59E0B",          # Orange doré (en vente)
+    "danger": "#EF4444",           # Rouge vif
+    "info": "#06B6D4",             # Cyan
+    "accent": "#0EA5E9",           # Bleu ciel moderne
+    "neutral": "#6B7280",          # Gris
+    
+    # Premium colors
+    "premium_purple": "#8B5CF6",   # Violet
+    "premium_pink": "#EC4899",     # Rose
+    "premium_indigo": "#6366F1",   # Indigo
+    
+    # Statuts spécifiques
+    "stock": "#6B7280",            # Gris (stock)
+    "en_vente": "#F59E0B",         # Orange
+    "vendu": "#10B981",            # Vert
+    "en_livraison": "#06B6D4",     # Cyan
+    "reserve": "#8B5CF6"           # Violet
+}
+
+# ====== STYLES ======
+STYLES = {
+    "card_border_radius": 12,
+    "button_border_radius": 8,
+    "sidebar_width": 250,
+    "shadow_blur": 20,
+    "transition_time": 200  # ms
 }
 
 # ====== CONFIGURATION DATABASE ======

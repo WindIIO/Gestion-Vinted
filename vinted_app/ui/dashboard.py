@@ -166,62 +166,70 @@ class DashboardFrame(ctk.CTkFrame):
             self._create_advanced_card(scroll_frame, idx % 4, 6 + idx // 4, item)
 
     def _create_kpi_card(self, parent, col, row, data):
-        """Crée une carte KPI cliquable"""
+        """Crée une carte KPI cliquable avec style moderne"""
         # Frame principal contenant la carte
         card_container = ctk.CTkFrame(
             parent,
             fg_color="transparent"
         )
-        card_container.grid(row=row, column=col, sticky="nsew", padx=10, pady=10)
+        card_container.grid(row=row, column=col, sticky="nsew", padx=12, pady=12)
         card_container.grid_rowconfigure(0, weight=1)
         card_container.grid_columnconfigure(0, weight=1)
         
-        # Créer la carte
+        # Créer la carte avec un border color accentué
         card = ctk.CTkFrame(
             card_container,
             fg_color=config.COLORS["bg_secondary"],
-            corner_radius=10,
+            corner_radius=15,
             border_width=2,
             border_color=data["color"]
         )
         card.grid(row=0, column=0, sticky="nsew")
+        card.pack_propagate(False)
 
-        # Titre et icône
+        # Titre et icône avec style
         header_frame = ctk.CTkFrame(card, fg_color="transparent")
-        header_frame.pack(fill="x", padx=15, pady=(15, 5))
+        header_frame.pack(fill="x", padx=20, pady=(20, 10))
 
-        ctk.CTkLabel(
+        # Icône plus grande et colorée
+        icon_label = ctk.CTkLabel(
             header_frame,
             text=data["icon"],
-            font=("Arial", 24)
-        ).pack(side="left", padx=(0, 10))
+            font=("Arial", 32)
+        )
+        icon_label.pack(side="left", padx=(0, 12))
 
-        ctk.CTkLabel(
+        # Titre du KPI
+        title_label = ctk.CTkLabel(
             header_frame,
             text=data["title"],
-            font=("Arial", 12),
+            font=("Arial", 13, "bold"),
             text_color=config.COLORS["fg_text_secondary"]
-        ).pack(side="left")
+        )
+        title_label.pack(side="left")
 
-        # Valeur
+        # Valeur avec couleur distinctive
         value = data["format"](data["value_fn"]())
         value_label = ctk.CTkLabel(
             card,
             text=value,
-            font=("Arial", 28, "bold"),
+            font=("Arial", 32, "bold"),
             text_color=data["color"]
         )
-        value_label.pack(padx=15, pady=10)
+        value_label.pack(padx=20, pady=(5, 10))
         
-        # Ajouter une indication de clic si un graphique est disponible
+        # Indication de clic si graphique disponible
         if data["chart_fn"]:
+            info_frame = ctk.CTkFrame(card, fg_color="transparent")
+            info_frame.pack(fill="x", padx=20, pady=(0, 15))
+            
             info_label = ctk.CTkLabel(
-                card,
-                text="🔍 Cliquez pour voir le graphique",
-                font=("Arial", 9),
-                text_color=config.COLORS["fg_text_secondary"]
+                info_frame,
+                text="↓ Cliquer pour voir le graphique",
+                font=("Arial", 10),
+                text_color=data["color"]
             )
-            info_label.pack(padx=15, pady=(0, 10))
+            info_label.pack()
             
             # Bind des événements de clic
             def on_click(event=None, chart_fn=data["chart_fn"], title=data["title"]):
@@ -233,61 +241,84 @@ class DashboardFrame(ctk.CTkFrame):
             
             card.bind("<Button-1>", on_click)
             header_frame.bind("<Button-1>", on_click)
+            icon_label.bind("<Button-1>", on_click)
+            title_label.bind("<Button-1>", on_click)
             value_label.bind("<Button-1>", on_click)
             info_label.bind("<Button-1>", on_click)
             
-            # Change le curseur pour indiquer que c'est cliquable
-            card.bind("<Enter>", lambda e: card.configure(fg_color=config.COLORS["bg_tertiary"]))
-            card.bind("<Leave>", lambda e: card.configure(fg_color=config.COLORS["bg_secondary"]))
-            header_frame.bind("<Enter>", lambda e: card.configure(fg_color=config.COLORS["bg_tertiary"]))
-            header_frame.bind("<Leave>", lambda e: card.configure(fg_color=config.COLORS["bg_secondary"]))
-            value_label.bind("<Enter>", lambda e: card.configure(fg_color=config.COLORS["bg_tertiary"]))
-            value_label.bind("<Leave>", lambda e: card.configure(fg_color=config.COLORS["bg_secondary"]))
-            info_label.bind("<Enter>", lambda e: card.configure(fg_color=config.COLORS["bg_tertiary"]))
-            info_label.bind("<Leave>", lambda e: card.configure(fg_color=config.COLORS["bg_secondary"]))
+            # Effets de survol
+            def on_enter(e):
+                card.configure(fg_color=config.COLORS["bg_tertiary"])
+            def on_leave(e):
+                card.configure(fg_color=config.COLORS["bg_secondary"])
+            
+            card.bind("<Enter>", on_enter)
+            card.bind("<Leave>", on_leave)
+            header_frame.bind("<Enter>", on_enter)
+            header_frame.bind("<Leave>", on_leave)
+            value_label.bind("<Enter>", on_enter)
+            value_label.bind("<Leave>", on_leave)
+            info_frame.bind("<Enter>", on_enter)
+            info_frame.bind("<Leave>", on_leave)
 
     def _create_stat_card(self, parent, col, row, data):
-        """Crée une carte de statistique cliquable"""
+        """Crée une carte de statistique cliquable avec style"""
         card = ctk.CTkFrame(
             parent,
             fg_color=config.COLORS["bg_secondary"],
-            corner_radius=10
+            corner_radius=15,
+            border_width=1,
+            border_color=config.COLORS["bg_tertiary"]
         )
-        card.grid(row=row, column=col, sticky="nsew", padx=10, pady=10)
+        card.grid(row=row, column=col, sticky="nsew", padx=12, pady=12)
+
+        # Icône colorée avec fond
+        icon_bg = ctk.CTkFrame(
+            card,
+            fg_color=config.COLORS["bg_tertiary"],
+            corner_radius=10,
+            width=60,
+            height=60
+        )
+        icon_bg.pack(pady=(20, 10))
+        icon_bg.pack_propagate(False)
 
         icon_label = ctk.CTkLabel(
-            card,
+            icon_bg,
             text=data["icon"],
-            font=("Arial", 32)
+            font=("Arial", 36),
+            text_color=data["color"]
         )
-        icon_label.pack(pady=(15, 5))
+        icon_label.place(relx=0.5, rely=0.5, anchor="center")
 
+        # Titre
         title_label = ctk.CTkLabel(
             card,
             text=data["title"],
-            font=("Arial", 11),
-            text_color=config.COLORS["fg_text_secondary"]
+            font=("Arial", 12, "bold"),
+            text_color=config.COLORS["fg_text"]
         )
         title_label.pack()
 
+        # Valeur grande
         value = str(data["value_fn"]())
         value_label = ctk.CTkLabel(
             card,
             text=value,
-            font=("Arial", 24, "bold"),
+            font=("Arial", 28, "bold"),
             text_color=data["color"]
         )
         value_label.pack(pady=10)
         
-        # Ajouter une indication de clic
+        # Indication de clic
         if "chart_fn" in data and data["chart_fn"]:
             info_label = ctk.CTkLabel(
                 card,
-                text="🔍 Cliquez",
+                text="⬆ Détails",
                 font=("Arial", 9),
-                text_color=config.COLORS["fg_text_secondary"]
+                text_color=data["color"]
             )
-            info_label.pack(padx=15, pady=(0, 10))
+            info_label.pack(padx=15, pady=(0, 15))
             
             # Bind des événements de clic
             def on_click(event=None, chart_fn=data["chart_fn"], title=data["title"]):
@@ -298,22 +329,30 @@ class DashboardFrame(ctk.CTkFrame):
                     print(f"Erreur lors de la création du graphique: {e}")
             
             card.bind("<Button-1>", on_click)
+            icon_bg.bind("<Button-1>", on_click)
             icon_label.bind("<Button-1>", on_click)
             title_label.bind("<Button-1>", on_click)
             value_label.bind("<Button-1>", on_click)
             info_label.bind("<Button-1>", on_click)
             
-            # Change la couleur au survol
-            card.bind("<Enter>", lambda e: card.configure(fg_color=config.COLORS["bg_tertiary"]))
-            card.bind("<Leave>", lambda e: card.configure(fg_color=config.COLORS["bg_secondary"]))
-            icon_label.bind("<Enter>", lambda e: card.configure(fg_color=config.COLORS["bg_tertiary"]))
-            icon_label.bind("<Leave>", lambda e: card.configure(fg_color=config.COLORS["bg_secondary"]))
-            title_label.bind("<Enter>", lambda e: card.configure(fg_color=config.COLORS["bg_tertiary"]))
-            title_label.bind("<Leave>", lambda e: card.configure(fg_color=config.COLORS["bg_secondary"]))
-            value_label.bind("<Enter>", lambda e: card.configure(fg_color=config.COLORS["bg_tertiary"]))
-            value_label.bind("<Leave>", lambda e: card.configure(fg_color=config.COLORS["bg_secondary"]))
-            info_label.bind("<Enter>", lambda e: card.configure(fg_color=config.COLORS["bg_tertiary"]))
-            info_label.bind("<Leave>", lambda e: card.configure(fg_color=config.COLORS["bg_secondary"]))
+            # Effets hover
+            def on_enter(e):
+                card.configure(fg_color=config.COLORS["bg_tertiary"])
+            def on_leave(e):
+                card.configure(fg_color=config.COLORS["bg_secondary"])
+            
+            card.bind("<Enter>", on_enter)
+            card.bind("<Leave>", on_leave)
+            icon_bg.bind("<Enter>", on_enter)
+            icon_bg.bind("<Leave>", on_leave)
+            icon_label.bind("<Enter>", on_enter)
+            icon_label.bind("<Leave>", on_leave)
+            title_label.bind("<Enter>", on_enter)
+            title_label.bind("<Leave>", on_leave)
+            value_label.bind("<Enter>", on_enter)
+            value_label.bind("<Leave>", on_leave)
+            info_label.bind("<Enter>", on_enter)
+            info_label.bind("<Leave>", on_leave)
 
     def _create_advanced_card(self, parent, col, row, data):
         """Crée une carte avancée cliquable"""

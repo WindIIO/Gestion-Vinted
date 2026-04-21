@@ -43,12 +43,12 @@ def get_status_color(status: str) -> str:
     """Retourne la couleur correspondant au statut"""
     colors = {
         "STOCK": "#6B7280",        # Gris - En Stock
-        "EN_VENTE": "#F59E0B",     # Orange - En Vente
-        "VENDU": "#22C55E",        # Vert - Vendu
-        "EN_LIVRAISON": "#3B82F6", # Bleu - En Livraison
-        "RESERVE": "#A855F7"       # Violet - Réservé
+        "EN_VENTE": "#F59E0B",     # Orange doré - En Vente
+        "VENDU": "#10B981",        # Vert émeraude - Vendu
+        "EN_LIVRAISON": "#06B6D4", # Cyan - En Livraison
+        "RESERVE": "#8B5CF6"       # Violet - Réservé
     }
-    return colors.get(status, "#3B82F6")
+    return colors.get(status, "#06B6D4")
 
 
 def get_status_label(status: str) -> str:

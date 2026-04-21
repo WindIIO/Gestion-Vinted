@@ -153,10 +153,10 @@ class ProductListFrame(ctk.CTkFrame):
         # Créer le header du tableau
         header = ctk.CTkFrame(
             self.table_frame,
-            fg_color=config.COLORS["bg_secondary"],
-            corner_radius=8
+            fg_color=config.COLORS["bg_tertiary"],
+            corner_radius=12
         )
-        header.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        header.grid(row=0, column=0, sticky="ew", pady=(0, 15), padx=5)
         header.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
 
         headers = ["Nom", "Catégorie", "Prix Achat", "Prix Vente", "Bénéfice", "Statut", "Actions"]
@@ -164,9 +164,9 @@ class ProductListFrame(ctk.CTkFrame):
             ctk.CTkLabel(
                 header,
                 text=h,
-                font=("Arial", 12, "bold"),
+                font=("Arial", 11, "bold"),
                 text_color=config.COLORS["fg_text"]
-            ).grid(row=0, column=idx, padx=15, pady=10, sticky="w")
+            ).grid(row=0, column=idx, padx=12, pady=12, sticky="w")
 
         # Créer les lignes
         if not products:
@@ -181,58 +181,68 @@ class ProductListFrame(ctk.CTkFrame):
                 self._create_product_row(self.table_frame, idx, product)
 
     def _create_product_row(self, parent, row, product: Product):
-        """Crée une ligne de produit"""
+        """Crée une ligne de produit stylisée"""
         row_frame = ctk.CTkFrame(
             parent,
             fg_color=config.COLORS["bg_secondary"],
-            corner_radius=8
+            corner_radius=10,
+            border_width=1,
+            border_color=config.COLORS["bg_tertiary"]
         )
-        row_frame.grid(row=row, column=0, sticky="ew", pady=5)
+        row_frame.grid(row=row, column=0, sticky="ew", pady=6, padx=5)
         row_frame.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
 
-        # Nom
+        # Nom du produit
         ctk.CTkLabel(
             row_frame,
             text=product.name,
-            font=("Arial", 11),
+            font=("Arial", 11, "bold"),
             text_color=config.COLORS["fg_text"]
-        ).grid(row=0, column=0, padx=15, pady=10, sticky="w")
+        ).grid(row=0, column=0, padx=12, pady=12, sticky="w")
 
-        # Catégorie
-        ctk.CTkLabel(
+        # Catégorie avec badge
+        category_frame = ctk.CTkFrame(
             row_frame,
+            fg_color=config.COLORS["bg_tertiary"],
+            corner_radius=6
+        )
+        category_frame.grid(row=0, column=1, padx=6, pady=12, sticky="ew")
+        
+        ctk.CTkLabel(
+            category_frame,
             text=product.category,
-            font=("Arial", 11),
-            text_color=config.COLORS["fg_text_secondary"]
-        ).grid(row=0, column=1, padx=15, pady=10, sticky="w")
+            font=("Arial", 10),
+            text_color=config.COLORS["fg_text"]
+        ).pack(padx=8, pady=4)
 
         # Prix achat
         ctk.CTkLabel(
             row_frame,
             text=format_currency(product.purchase_price),
-            font=("Arial", 11),
-            text_color=config.COLORS["fg_text"]
-        ).grid(row=0, column=2, padx=15, pady=10, sticky="w")
+            font=("Arial", 10),
+            text_color=config.COLORS["fg_text_secondary"]
+        ).grid(row=0, column=2, padx=12, pady=12, sticky="w")
 
         # Prix vente
         ctk.CTkLabel(
             row_frame,
             text=format_currency(product.selling_price),
-            font=("Arial", 11),
-            text_color=config.COLORS["fg_text"]
-        ).grid(row=0, column=3, padx=15, pady=10, sticky="w")
+            font=("Arial", 10),
+            text_color=config.COLORS["fg_text_secondary"]
+        ).grid(row=0, column=3, padx=12, pady=12, sticky="w")
 
         # Bénéfice
         profit = product.get_profit()
         profit_color = config.COLORS["success"] if profit >= 0 else config.COLORS["danger"]
+        profit_symbol = "+" if profit >= 0 else ""
         ctk.CTkLabel(
             row_frame,
-            text=format_currency(profit),
+            text=f"{profit_symbol}{format_currency(profit)}",
             font=("Arial", 11, "bold"),
             text_color=profit_color
-        ).grid(row=0, column=4, padx=15, pady=10, sticky="w")
+        ).grid(row=0, column=4, padx=12, pady=12, sticky="w")
 
-        # Statut
+        # Statut avec couleur appropriée
         status_label = get_status_label(product.status)
         status_color = get_status_color(product.status)
         status_frame = ctk.CTkFrame(
@@ -240,7 +250,7 @@ class ProductListFrame(ctk.CTkFrame):
             fg_color=status_color,
             corner_radius=6
         )
-        status_frame.grid(row=0, column=5, padx=15, pady=10, sticky="ew")
+        status_frame.grid(row=0, column=5, padx=6, pady=12, sticky="ew")
 
         ctk.CTkLabel(
             status_frame,
@@ -251,12 +261,11 @@ class ProductListFrame(ctk.CTkFrame):
 
         # Actions
         action_frame = ctk.CTkFrame(row_frame, fg_color="transparent")
-        action_frame.grid(row=0, column=6, padx=15, pady=10, sticky="e")
+        action_frame.grid(row=0, column=6, padx=12, pady=12, sticky="e")
 
         # Menu pour changer le statut
         status_options = [s for s in config.PRODUCT_STATUS.keys() if s != product.status]
         if status_options:
-            status_menu_label = "Changer statut"
             status_menu = ctk.CTkOptionMenu(
                 action_frame,
                 values=status_options,
@@ -265,24 +274,33 @@ class ProductListFrame(ctk.CTkFrame):
                 button_color=config.COLORS["accent"],
                 dropdown_fg_color=config.COLORS["bg_secondary"],
                 font=("Arial", 9),
-                height=25,
-                width=100
+                height=28,
+                width=95
             )
-            status_menu.set("Status")
+            status_menu.set("Statut")
             status_menu.pack(side="left", padx=3)
 
         # Bouton supprimer
         btn_delete = ctk.CTkButton(
             action_frame,
             text="✕",
-            font=("Arial", 9),
-            height=25,
-            width=30,
+            font=("Arial", 10, "bold"),
+            height=28,
+            width=28,
             fg_color=config.COLORS["danger"],
-            hover_color="#991111",
+            hover_color="#DC2626",
             command=lambda p=product: self._delete_product(p)
         )
         btn_delete.pack(side="left", padx=3)
+        
+        # Effet hover sur la ligne
+        def on_enter(e):
+            row_frame.configure(fg_color=config.COLORS["bg_tertiary"])
+        def on_leave(e):
+            row_frame.configure(fg_color=config.COLORS["bg_secondary"])
+        
+        row_frame.bind("<Enter>", on_enter)
+        row_frame.bind("<Leave>", on_leave)
 
     def _change_product_status(self, product: Product, new_status: str):
         """Change le statut d'un produit"""
