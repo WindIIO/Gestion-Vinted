@@ -1,0 +1,261 @@
+"""
+Page Liste des Produits
+"""
+import customtkinter as ctk
+from tkinter import messagebox
+from vinted_app.services.product_service import ProductService
+from vinted_app.services.finance_service import FinanceService
+from vinted_app.database.models import Product
+from vinted_app import config
+from vinted_app.utils.helpers import format_currency, get_status_color, get_status_label
+
+
+class ProductListFrame(ctk.CTkFrame):
+    """Frame pour la liste des produits"""
+
+    def __init__(self, parent, product_service: ProductService,
+                 finance_service: FinanceService, refresh_callback):
+        """Initialise la liste des produits"""
+        super().__init__(parent, fg_color=config.COLORS["bg_primary"])
+
+        self.product_service = product_service
+        self.finance_service = finance_service
+        self.refresh_callback = refresh_callback
+
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        # Filtres actuels
+        self.current_filter = None
+        self.search_query = ""
+
+        self._create_ui()
+
+    def _create_ui(self):
+        """Crée l'interface"""
+        # === BARRE SUPÉRIEURE ===
+        header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        header_frame.grid(row=0, column=0, sticky="ew", padx=20, pady=20)
+        header_frame.grid_columnconfigure(1, weight=1)
+
+        title = ctk.CTkLabel(
+            header_frame,
+            text="📦 Liste des Produits",
+            font=("Arial", 20, "bold"),
+            text_color=config.COLORS["fg_text"]
+        )
+        title.grid(row=0, column=0, sticky="w")
+
+        # Barre de recherche
+        search_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+        search_frame.grid(row=0, column=1, sticky="e", padx=(20, 0))
+
+        self.search_var = ctk.StringVar()
+        search_entry = ctk.CTkEntry(
+            search_frame,
+            placeholder_text="Rechercher un produit...",
+            textvariable=self.search_var,
+            width=300,
+            fg_color=config.COLORS["bg_secondary"]
+        )
+        search_entry.pack(side="left", padx=(0, 10))
+        self.search_var.trace("w", lambda *args: self.refresh())
+
+        # Boutons de filtre
+        filter_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+        filter_frame.grid(row=0, column=2, sticky="e", padx=(20, 0))
+
+        for status, label in [("STOCK", "En Stock"), ("EN_VENTE", "En Vente"), ("VENDU", "Vendus"), (None, "Tous")]:
+            btn = ctk.CTkButton(
+                filter_frame,
+                text=label,
+                command=lambda s=status: self._set_filter(s),
+                fg_color=config.COLORS["bg_secondary"],
+                hover_color=config.COLORS["accent"],
+                font=("Arial", 10),
+                height=30
+            )
+            btn.pack(side="left", padx=5)
+
+        # === TABLEAU ===
+        self.table_frame = ctk.CTkScrollableFrame(
+            self,
+            fg_color=config.COLORS["bg_primary"]
+        )
+        self.table_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 20))
+        self.table_frame.grid_columnconfigure(0, weight=1)
+
+        self._refresh_table()
+
+    def _set_filter(self, status):
+        """Change le filtre"""
+        self.current_filter = status
+        self.refresh()
+
+    def _refresh_table(self):
+        """Rafraîchit le tableau"""
+        # Effacer le tableau
+        for widget in self.table_frame.winfo_children():
+            widget.destroy()
+
+        # Récupérer les produits
+        if self.current_filter:
+            products = self.product_service.get_products_by_status(self.current_filter)
+        else:
+            products = self.product_service.get_all_products()
+
+        # Appliquer la recherche
+        if self.search_query:
+            products = [p for p in products if self.search_query.lower() in p.name.lower()]
+
+        # Créer le header du tableau
+        header = ctk.CTkFrame(
+            self.table_frame,
+            fg_color=config.COLORS["bg_secondary"],
+            corner_radius=8
+        )
+        header.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        header.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
+
+        headers = ["Nom", "Catégorie", "Prix Achat", "Prix Vente", "Bénéfice", "Statut", "Actions"]
+        for idx, h in enumerate(headers):
+            ctk.CTkLabel(
+                header,
+                text=h,
+                font=("Arial", 12, "bold"),
+                text_color=config.COLORS["fg_text"]
+            ).grid(row=0, column=idx, padx=15, pady=10, sticky="w")
+
+        # Créer les lignes
+        if not products:
+            ctk.CTkLabel(
+                self.table_frame,
+                text="Aucun produit trouvé",
+                font=("Arial", 12),
+                text_color=config.COLORS["fg_text_secondary"]
+            ).grid(row=1, column=0, pady=30)
+        else:
+            for idx, product in enumerate(products, 1):
+                self._create_product_row(self.table_frame, idx, product)
+
+    def _create_product_row(self, parent, row, product: Product):
+        """Crée une ligne de produit"""
+        row_frame = ctk.CTkFrame(
+            parent,
+            fg_color=config.COLORS["bg_secondary"],
+            corner_radius=8
+        )
+        row_frame.grid(row=row, column=0, sticky="ew", pady=5)
+        row_frame.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
+
+        # Nom
+        ctk.CTkLabel(
+            row_frame,
+            text=product.name,
+            font=("Arial", 11),
+            text_color=config.COLORS["fg_text"]
+        ).grid(row=0, column=0, padx=15, pady=10, sticky="w")
+
+        # Catégorie
+        ctk.CTkLabel(
+            row_frame,
+            text=product.category,
+            font=("Arial", 11),
+            text_color=config.COLORS["fg_text_secondary"]
+        ).grid(row=0, column=1, padx=15, pady=10, sticky="w")
+
+        # Prix achat
+        ctk.CTkLabel(
+            row_frame,
+            text=format_currency(product.purchase_price),
+            font=("Arial", 11),
+            text_color=config.COLORS["fg_text"]
+        ).grid(row=0, column=2, padx=15, pady=10, sticky="w")
+
+        # Prix vente
+        ctk.CTkLabel(
+            row_frame,
+            text=format_currency(product.selling_price),
+            font=("Arial", 11),
+            text_color=config.COLORS["fg_text"]
+        ).grid(row=0, column=3, padx=15, pady=10, sticky="w")
+
+        # Bénéfice
+        profit = product.get_profit()
+        profit_color = config.COLORS["success"] if profit >= 0 else config.COLORS["danger"]
+        ctk.CTkLabel(
+            row_frame,
+            text=format_currency(profit),
+            font=("Arial", 11, "bold"),
+            text_color=profit_color
+        ).grid(row=0, column=4, padx=15, pady=10, sticky="w")
+
+        # Statut
+        status_label = get_status_label(product.status)
+        status_color = get_status_color(product.status)
+        status_frame = ctk.CTkFrame(
+            row_frame,
+            fg_color=status_color,
+            corner_radius=6
+        )
+        status_frame.grid(row=0, column=5, padx=15, pady=10, sticky="ew")
+
+        ctk.CTkLabel(
+            status_frame,
+            text=status_label,
+            font=("Arial", 10, "bold"),
+            text_color="white"
+        ).pack(padx=10, pady=5)
+
+        # Actions
+        action_frame = ctk.CTkFrame(row_frame, fg_color="transparent")
+        action_frame.grid(row=0, column=6, padx=15, pady=10, sticky="e")
+
+        # Bouton changer statut
+        if product.status != "VENDU":
+            btn = ctk.CTkButton(
+                action_frame,
+                text="✓ Vendre",
+                font=("Arial", 9),
+                height=25,
+                width=70,
+                command=lambda p=product: self._mark_as_sold(p)
+            )
+            btn.pack(side="left", padx=5)
+
+        # Bouton supprimer
+        btn_delete = ctk.CTkButton(
+            action_frame,
+            text="✕",
+            font=("Arial", 9),
+            height=25,
+            width=30,
+            fg_color=config.COLORS["danger"],
+            hover_color="#991111",
+            command=lambda p=product: self._delete_product(p)
+        )
+        btn_delete.pack(side="left", padx=5)
+
+    def _mark_as_sold(self, product: Product):
+        """Marque un produit comme vendu"""
+        if self.product_service.change_product_status(product.id, "VENDU"):
+            messagebox.showinfo("Succès", f"{product.name} a été marqué comme vendu!")
+            self.refresh()
+            self.refresh_callback()
+        else:
+            messagebox.showerror("Erreur", "Impossible de marquer le produit comme vendu")
+
+    def _delete_product(self, product: Product):
+        """Supprime un produit"""
+        if messagebox.askyesno("Confirmation", f"Êtes-vous sûr de vouloir supprimer {product.name}?"):
+            if self.product_service.delete_product(product.id):
+                messagebox.showinfo("Succès", f"{product.name} a été supprimé!")
+                self.refresh()
+                self.refresh_callback()
+            else:
+                messagebox.showerror("Erreur", "Impossible de supprimer le produit")
+
+    def refresh(self):
+        """Rafraîchit le tableau"""
+        self.search_query = self.search_var.get() if hasattr(self, 'search_var') else ""
+        self._refresh_table()
