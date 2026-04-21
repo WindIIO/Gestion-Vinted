@@ -1,12 +1,11 @@
-# 🎉 VOTRE APPLICATION EST PRÊTE!
+# Vinted Stock Manager
 
 ```
 ╔════════════════════════════════════════════════════════════════╗
 ║                                                                ║
-║         🎁 VINTED STOCK MANAGER - v1.0.0 🎁                   ║
+║              VINTED STOCK MANAGER - v1.0.0                    ║
 ║                                                                ║
-║             APPLICATION COMPLÈTEMENT GÉNÉRÉE                  ║
-║              TESTÉE • FONCTIONNELLE • PRÊTE                   ║
+║    Application de gestion de stock Vinted complète             ║
 ║                                                                ║
 ╚════════════════════════════════════════════════════════════════╝
 ```
