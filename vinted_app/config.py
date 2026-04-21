@@ -108,7 +108,9 @@ SAMPLE_PRODUCTS = [
         "fees": 3.5,
         "quantity": 1,
         "status": "EN_VENTE",
-        "notes": "Bleu classique, taille M"
+        "notes": "Bleu classique, taille M",
+        "description": "Jean Levi's 501 authentique, taille M, état très bon avec quelques signes d'usure normale.",
+        "pegi": None
     },
     {
         "name": "Nike Air Force 1",
@@ -120,7 +122,9 @@ SAMPLE_PRODUCTS = [
         "fees": 8.0,
         "quantity": 1,
         "status": "VENDU",
-        "notes": "Blanc cassé"
+        "notes": "Blanc cassé",
+        "description": "Sneakers Nike Air Force 1 blanches avec quelques marques d'usure sur les semelles.",
+        "pegi": None
     },
     {
         "name": "Louis Vuitton Speedy",
@@ -132,7 +136,9 @@ SAMPLE_PRODUCTS = [
         "fees": 30.0,
         "quantity": 1,
         "status": "STOCK",
-        "notes": "Authentique, avec certificat"
+        "notes": "Authentique, avec certificat",
+        "description": "Sac à main Louis Vuitton Speedy 30 en toile monogramme, authentique avec certificat d'authenticité.",
+        "pegi": None
     },
     {
         "name": "T-shirt Vintage Nirvana",
@@ -144,7 +150,9 @@ SAMPLE_PRODUCTS = [
         "fees": 2.5,
         "quantity": 1,
         "status": "STOCK",
-        "notes": "Rare"
+        "notes": "Rare",
+        "description": "T-shirt vintage Nirvana avec le logo emblématique, état bon avec quelques décolorations.",
+        "pegi": None
     },
     {
         "name": "PlayStation 5 Manette",
@@ -156,6 +164,22 @@ SAMPLE_PRODUCTS = [
         "fees": 10.0,
         "quantity": 2,
         "status": "STOCK",
-        "notes": "Noir et blanc"
+        "notes": "Noir et blanc",
+        "description": "Manette DualSense pour PlayStation 5, neuve sous blister, disponible en noir et blanc.",
+        "pegi": None
+    },
+    {
+        "name": "The Legend of Zelda: Breath of the Wild",
+        "category": "Jeux vidéo",
+        "platform": "Vinted",
+        "condition": "Très bon état",
+        "purchase_price": 25.0,
+        "selling_price": 45.0,
+        "fees": 5.5,
+        "quantity": 1,
+        "status": "EN_VENTE",
+        "notes": "Complet avec boîtier",
+        "description": "Jeu The Legend of Zelda: Breath of the Wild pour Nintendo Switch, complet avec manuel et boîtier.",
+        "pegi": 12
     }
 ]

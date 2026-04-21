@@ -19,6 +19,8 @@ class Product:
     quantity: int = 1
     status: str = "STOCK"
     notes: str = ""
+    description: str = ""
+    pegi: Optional[int] = None
     image_path: Optional[str] = None
     id: Optional[int] = None
     date_added: Optional[str] = None
@@ -48,6 +50,8 @@ class Product:
             'quantity': self.quantity,
             'status': self.status,
             'notes': self.notes,
+            'description': self.description,
+            'pegi': self.pegi,
             'image_path': self.image_path,
             'date_added': self.date_added,
             'date_sold': self.date_sold
@@ -68,6 +72,8 @@ class Product:
             quantity=data.get('quantity', 1),
             status=data.get('status', 'STOCK'),
             notes=data.get('notes', ''),
+            description=data.get('description', ''),
+            pegi=data.get('pegi'),
             image_path=data.get('image_path'),
             date_added=data.get('date_added'),
             date_sold=data.get('date_sold')

@@ -45,12 +45,29 @@ class DatabaseManager:
                 date_added TEXT,
                 date_sold TEXT,
                 notes TEXT,
+                description TEXT DEFAULT '',
+                pegi INTEGER,
                 image_path TEXT
             )
         ''')
 
+        # Migration : ajouter les colonnes si elles n'existent pas
+        self._migrate_database(cursor)
+
         conn.commit()
         conn.close()
+
+    def _migrate_database(self, cursor):
+        """Migre la base de données pour ajouter les nouvelles colonnes"""
+        # Vérifier et ajouter la colonne description
+        cursor.execute("PRAGMA table_info(products)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'description' not in columns:
+            cursor.execute("ALTER TABLE products ADD COLUMN description TEXT DEFAULT ''")
+        
+        if 'pegi' not in columns:
+            cursor.execute("ALTER TABLE products ADD COLUMN pegi INTEGER")
 
     def _get_connection(self) -> sqlite3.Connection:
         """Obtient une connexion à la base de données"""
@@ -70,8 +87,8 @@ class DatabaseManager:
         cursor.execute('''
             INSERT INTO products (name, category, platform, condition,
                                 purchase_price, selling_price, fees, quantity,
-                                status, date_added, notes, image_path)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                status, date_added, notes, description, pegi, image_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             product.name,
             product.category,
@@ -84,6 +101,8 @@ class DatabaseManager:
             product.status,
             product.date_added,
             product.notes,
+            product.description,
+            product.pegi,
             product.image_path
         ))
 
@@ -139,7 +158,7 @@ class DatabaseManager:
             UPDATE products
             SET name = ?, category = ?, platform = ?, condition = ?,
                 purchase_price = ?, selling_price = ?, fees = ?, quantity = ?,
-                status = ?, date_sold = ?, notes = ?, image_path = ?
+                status = ?, date_sold = ?, notes = ?, description = ?, pegi = ?, image_path = ?
             WHERE id = ?
         ''', (
             product.name,
@@ -153,6 +172,8 @@ class DatabaseManager:
             product.status,
             product.date_sold,
             product.notes,
+            product.description,
+            product.pegi,
             product.image_path,
             product.id
         ))
@@ -223,8 +244,8 @@ class DatabaseManager:
             cursor.execute('''
                 INSERT INTO products (name, category, platform, condition,
                                     purchase_price, selling_price, fees, quantity,
-                                    status, date_added, date_sold, notes, image_path)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    status, date_added, date_sold, notes, description, pegi, image_path)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 product.name,
                 product.category,
@@ -238,6 +259,8 @@ class DatabaseManager:
                 product.date_added,
                 product.date_sold,
                 product.notes,
+                product.description,
+                product.pegi,
                 product.image_path
             ))
 
