@@ -12,6 +12,19 @@ class ProductService:
     def __init__(self, db: DatabaseManager):
         """Initialise le service"""
         self.db = db
+        self._cache = {}
+        self._cache_valid = False
+
+    def _invalidate_cache(self):
+        """Invalide le cache"""
+        self._cache_valid = False
+        self._cache = {}
+
+    def _get_cached_products(self, key: str, fetch_func):
+        """Récupère les produits depuis le cache ou la DB"""
+        if not self._cache_valid or key not in self._cache:
+            self._cache[key] = fetch_func()
+        return self._cache.get(key, [])
 
     def create_product(self, name: str, category: str, platform: str,
                       condition: str, purchase_price: float,
@@ -31,11 +44,14 @@ class ProductService:
             status=status,
             notes=notes
         )
-        return self.db.add_product(product)
+        product_id = self.db.add_product(product)
+        if product_id:
+            self._invalidate_cache()
+        return product_id
 
     def get_all_products(self) -> List[Product]:
         """Récupère tous les produits"""
-        return self.db.get_all_products()
+        return self._get_cached_products("all", self.db.get_all_products)
 
     def get_product(self, product_id: int) -> Optional[Product]:
         """Récupère un produit par ID"""
@@ -43,7 +59,7 @@ class ProductService:
 
     def get_products_by_status(self, status: str) -> List[Product]:
         """Récupère les produits par statut"""
-        return self.db.get_products_by_status(status)
+        return self._get_cached_products(f"status_{status}", lambda: self.db.get_products_by_status(status))
 
     def update_product(self, product_id: int, **kwargs) -> bool:
         """Met à jour un produit"""
@@ -55,15 +71,24 @@ class ProductService:
             if hasattr(product, key):
                 setattr(product, key, value)
 
-        return self.db.update_product(product)
+        success = self.db.update_product(product)
+        if success:
+            self._invalidate_cache()
+        return success
 
     def change_product_status(self, product_id: int, new_status: str) -> bool:
         """Change le statut d'un produit"""
-        return self.db.update_product_status(product_id, new_status)
+        success = self.db.update_product_status(product_id, new_status)
+        if success:
+            self._invalidate_cache()
+        return success
 
     def delete_product(self, product_id: int) -> bool:
         """Supprime un produit"""
-        return self.db.delete_product(product_id)
+        success = self.db.delete_product(product_id)
+        if success:
+            self._invalidate_cache()
+        return success
 
     def search_products(self, query: str) -> List[Product]:
         """Recherche des produits"""

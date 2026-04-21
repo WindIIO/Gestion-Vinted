@@ -2,7 +2,6 @@
 Page Ajouter un Produit
 """
 import customtkinter as ctk
-from tkinter import messagebox
 from vinted_app.services.product_service import ProductService
 from vinted_app import config
 
@@ -90,6 +89,15 @@ class AddProductFrame(ctk.CTkFrame):
         )
         self.profit_label.grid(row=1, column=0, sticky="w", pady=8)
 
+        # Label pour les messages de feedback
+        self.feedback_label = ctk.CTkLabel(
+            button_frame,
+            text="",
+            font=("Arial", 11),
+            text_color=config.COLORS["success"]
+        )
+        self.feedback_label.grid(row=1, column=0, sticky="w", pady=(5, 0))
+
         # Boutons d'action
         action_frame = ctk.CTkFrame(button_frame, fg_color="transparent")
         action_frame.grid(row=2, column=0, sticky="ew", pady=(25, 0))
@@ -146,6 +154,8 @@ class AddProductFrame(ctk.CTkFrame):
                 border_color=config.COLORS["bg_tertiary"],
                 border_width=1
             )
+            # Permettre l'ouverture du menu en cliquant sur toute la zone
+            entry.bind("<Button-1>", lambda e, cb=entry: cb.event_generate("<<ComboboxSelected>>") or cb.focus())
         else:
             entry = ctk.CTkEntry(
                 parent,
@@ -158,21 +168,17 @@ class AddProductFrame(ctk.CTkFrame):
 
         entry.grid(row=row, column=1, sticky="ew", pady=(18, 8), padx=12)
 
-    def _calculate_profit(self):
-        """Calcule le bénéfice estimé"""
-        try:
-            selling = float(self.selling_price_var.get() or 0)
-            purchase = float(self.purchase_price_var.get() or 0)
-            fees = float(self.fees_var.get() or 0)
-
-            profit = selling - purchase - fees
-            margin = (profit / selling * 100) if selling > 0 else 0
-
-            self.profit_label.configure(
-                text=f"💰 Bénéfice estimé: {profit:.2f}€ | Marge: {margin:.2f}%"
-            )
-        except ValueError:
-            self.profit_label.configure(text="⚠ Entrez des chiffres valides")
+    def _show_feedback(self, message: str, type_: str = "info"):
+        """Affiche un message de feedback temporaire"""
+        color_map = {
+            "success": config.COLORS["success"],
+            "danger": config.COLORS["danger"],
+            "warning": config.COLORS["warning"],
+            "info": config.COLORS["info"]
+        }
+        self.feedback_label.configure(text=message, text_color=color_map.get(type_, config.COLORS["fg_text"]))
+        # Effacer après 3 secondes
+        self.after(3000, lambda: self.feedback_label.configure(text=""))
 
     def _add_product(self):
         """Ajoute un produit"""
@@ -180,27 +186,27 @@ class AddProductFrame(ctk.CTkFrame):
             # Validation
             name = self.name_var.get().strip()
             if not name:
-                messagebox.showerror("Erreur", "Veuillez entrer un nom de produit")
+                self._show_feedback("Veuillez entrer un nom de produit", "danger")
                 return
 
             category = self.category_var.get()
             if not category:
-                messagebox.showerror("Erreur", "Veuillez sélectionner une catégorie")
+                self._show_feedback("Veuillez sélectionner une catégorie", "danger")
                 return
 
             platform = self.platform_var.get()
             if not platform:
-                messagebox.showerror("Erreur", "Veuillez sélectionner une plateforme")
+                self._show_feedback("Veuillez sélectionner une plateforme", "danger")
                 return
 
             condition = self.condition_var.get()
             if not condition:
-                messagebox.showerror("Erreur", "Veuillez sélectionner un état")
+                self._show_feedback("Veuillez sélectionner un état", "danger")
                 return
 
             status = self.status_var.get()
             if not status:
-                messagebox.showerror("Erreur", "Veuillez sélectionner un statut")
+                self._show_feedback("Veuillez sélectionner un statut", "danger")
                 return
 
             # Convertir les prix
@@ -210,7 +216,7 @@ class AddProductFrame(ctk.CTkFrame):
             quantity = int(self.quantity_var.get() or 1)
 
             if purchase_price < 0 or selling_price < 0 or fees < 0:
-                messagebox.showerror("Erreur", "Les prix ne peuvent pas être négatifs")
+                self._show_feedback("Les prix ne peuvent pas être négatifs", "danger")
                 return
 
             # Créer le produit
@@ -228,16 +234,16 @@ class AddProductFrame(ctk.CTkFrame):
             )
 
             if product_id:
-                messagebox.showinfo("Succès", f"Produit ajouté avec ID: {product_id}")
+                self._show_feedback(f"Produit ajouté avec succès (ID: {product_id})", "success")
                 self._reset_form()
                 self.refresh_callback()
             else:
-                messagebox.showerror("Erreur", "Impossible d'ajouter le produit")
+                self._show_feedback("Impossible d'ajouter le produit", "danger")
 
         except ValueError as e:
-            messagebox.showerror("Erreur", f"Format invalide: {str(e)}")
+            self._show_feedback(f"Format invalide: {str(e)}", "danger")
         except Exception as e:
-            messagebox.showerror("Erreur", f"Une erreur s'est produite: {str(e)}")
+            self._show_feedback(f"Une erreur s'est produite: {str(e)}", "danger")
 
     def _reset_form(self):
         """Réinitialise le formulaire"""
@@ -252,6 +258,7 @@ class AddProductFrame(ctk.CTkFrame):
         self.quantity_var.set("1")
         self.notes_var.set("")
         self.profit_label.configure(text="")
+        self.feedback_label.configure(text="")
 
     def refresh(self):
         """Rafraîchit le formulaire"""

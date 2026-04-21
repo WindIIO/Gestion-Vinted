@@ -2,7 +2,6 @@
 Page Liste des Produits
 """
 import customtkinter as ctk
-from tkinter import messagebox
 from vinted_app.services.product_service import ProductService
 from vinted_app.services.finance_service import FinanceService
 from vinted_app.database.models import Product
@@ -46,6 +45,15 @@ class ProductListFrame(ctk.CTkFrame):
             text_color=config.COLORS["fg_text"]
         )
         title.grid(row=0, column=0, sticky="w")
+
+        # Label de feedback
+        self.feedback_label = ctk.CTkLabel(
+            header_frame,
+            text="",
+            font=("Arial", 11),
+            text_color=config.COLORS["success"]
+        )
+        self.feedback_label.grid(row=1, column=0, sticky="w", pady=(5, 0))
 
         # Barre de recherche
         search_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
@@ -109,6 +117,8 @@ class ProductListFrame(ctk.CTkFrame):
         )
         self.category_filter.set("Toutes les catégories")
         self.category_filter.pack(side="left", padx=5)
+        # Permettre l'ouverture du menu en cliquant sur toute la zone
+        self.category_filter.bind("<Button-1>", lambda e: self.category_filter.event_generate("<<ComboboxSelected>>") or self.category_filter.focus())
 
         # === TABLEAU ===
         self.table_frame = ctk.CTkScrollableFrame(
@@ -306,11 +316,11 @@ class ProductListFrame(ctk.CTkFrame):
         """Change le statut d'un produit"""
         if self.product_service.change_product_status(product.id, new_status):
             status_label = config.PRODUCT_STATUS.get(new_status, new_status)
-            messagebox.showinfo("Succès", f"{product.name} est maintenant {status_label.lower()}!")
+            self._show_feedback(f"{product.name} est maintenant {status_label.lower()}", "success")
             self.refresh()
             self.refresh_callback()
         else:
-            messagebox.showerror("Erreur", "Impossible de changer le statut du produit")
+            self._show_feedback("Impossible de changer le statut du produit", "danger")
 
     def _mark_as_sold(self, product: Product):
         """Marque un produit comme vendu (compatible avec ancien code)"""
@@ -318,15 +328,27 @@ class ProductListFrame(ctk.CTkFrame):
 
     def _delete_product(self, product: Product):
         """Supprime un produit"""
-        if messagebox.askyesno("Confirmation", f"Êtes-vous sûr de vouloir supprimer {product.name}?"):
-            if self.product_service.delete_product(product.id):
-                messagebox.showinfo("Succès", f"{product.name} a été supprimé!")
-                self.refresh()
-                self.refresh_callback()
-            else:
-                messagebox.showerror("Erreur", "Impossible de supprimer le produit")
+        # Confirmation simple via feedback temporaire
+        self._show_feedback(f"Suppression de {product.name}...", "warning")
+        self.after(1000, lambda: self._confirm_delete(product))
 
-    def refresh(self):
-        """Rafraîchit le tableau"""
-        self.search_query = self.search_var.get() if hasattr(self, 'search_var') else ""
-        self._refresh_table()
+    def _confirm_delete(self, product: Product):
+        """Confirme la suppression après un délai"""
+        if self.product_service.delete_product(product.id):
+            self._show_feedback(f"{product.name} a été supprimé", "success")
+            self.refresh()
+            self.refresh_callback()
+        else:
+            self._show_feedback("Impossible de supprimer le produit", "danger")
+
+    def _show_feedback(self, message: str, type_: str = "info"):
+        """Affiche un message de feedback temporaire"""
+        color_map = {
+            "success": config.COLORS["success"],
+            "danger": config.COLORS["danger"],
+            "warning": config.COLORS["warning"],
+            "info": config.COLORS["info"]
+        }
+        self.feedback_label.configure(text=message, text_color=color_map.get(type_, config.COLORS["fg_text"]))
+        # Effacer après 3 secondes
+        self.after(3000, lambda: self.feedback_label.configure(text=""))
