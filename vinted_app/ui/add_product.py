@@ -38,10 +38,11 @@ class AddProductFrame(ctk.CTkFrame):
         self._create_form_field(scroll_frame, 1, "Catégorie", "category", field_type="combobox", options=config.CATEGORIES)
         self._create_form_field(scroll_frame, 2, "Plateforme", "platform", field_type="combobox", options=config.PLATFORMS)
         self._create_form_field(scroll_frame, 3, "État", "condition", field_type="combobox", options=config.CONDITIONS)
-        self._create_form_field(scroll_frame, 4, "Prix d'achat (€)", "purchase_price", field_type="float")
-        self._create_form_field(scroll_frame, 5, "Prix de vente (€)", "selling_price", field_type="float")
-        self._create_form_field(scroll_frame, 6, "Frais (€)", "fees", field_type="float")
-        self._create_form_field(scroll_frame, 7, "Quantité", "quantity", field_type="int")
+        self._create_form_field(scroll_frame, 4, "Statut initial", "status", field_type="combobox", options=list(config.PRODUCT_STATUS.keys()))
+        self._create_form_field(scroll_frame, 5, "Prix d'achat (€)", "purchase_price", field_type="float")
+        self._create_form_field(scroll_frame, 6, "Prix de vente (€)", "selling_price", field_type="float")
+        self._create_form_field(scroll_frame, 7, "Frais (€)", "fees", field_type="float")
+        self._create_form_field(scroll_frame, 8, "Quantité", "quantity", field_type="int")
 
         # Notes
         notes_label = ctk.CTkLabel(
@@ -50,7 +51,7 @@ class AddProductFrame(ctk.CTkFrame):
             font=("Arial", 12, "bold"),
             text_color=config.COLORS["fg_text"]
         )
-        notes_label.grid(row=8, column=0, columnspan=2, sticky="w", pady=(15, 5), padx=10)
+        notes_label.grid(row=9, column=0, columnspan=2, sticky="w", pady=(15, 5), padx=10)
 
         self.notes_var = ctk.StringVar()
         notes_textbox = ctk.CTkTextbox(
@@ -59,12 +60,12 @@ class AddProductFrame(ctk.CTkFrame):
             fg_color=config.COLORS["bg_secondary"],
             scrollbar_button_color=config.COLORS["bg_tertiary"]
         )
-        notes_textbox.grid(row=9, column=0, columnspan=2, sticky="nsew", pady=10, padx=10)
+        notes_textbox.grid(row=10, column=0, columnspan=2, sticky="nsew", pady=10, padx=10)
         notes_textbox.bind("<KeyRelease>", lambda e: self.notes_var.set(notes_textbox.get("1.0", "end")))
 
         # === BOUTONS ===
         button_frame = ctk.CTkFrame(scroll_frame, fg_color="transparent")
-        button_frame.grid(row=10, column=0, columnspan=2, sticky="ew", pady=30, padx=10)
+        button_frame.grid(row=11, column=0, columnspan=2, sticky="ew", pady=30, padx=10)
         button_frame.grid_columnconfigure(0, weight=1)
 
         # Calculer le bénéfice estimé
@@ -190,6 +191,11 @@ class AddProductFrame(ctk.CTkFrame):
                 messagebox.showerror("Erreur", "Veuillez sélectionner un état")
                 return
 
+            status = self.status_var.get()
+            if not status:
+                messagebox.showerror("Erreur", "Veuillez sélectionner un statut")
+                return
+
             # Convertir les prix
             purchase_price = float(self.purchase_price_var.get() or 0)
             selling_price = float(self.selling_price_var.get() or 0)
@@ -210,6 +216,7 @@ class AddProductFrame(ctk.CTkFrame):
                 selling_price=selling_price,
                 fees=fees,
                 quantity=quantity,
+                status=status,
                 notes=self.notes_var.get()
             )
 
@@ -231,6 +238,7 @@ class AddProductFrame(ctk.CTkFrame):
         self.category_var.set("")
         self.platform_var.set("")
         self.condition_var.set("")
+        self.status_var.set("STOCK")
         self.purchase_price_var.set("")
         self.selling_price_var.set("")
         self.fees_var.set("")

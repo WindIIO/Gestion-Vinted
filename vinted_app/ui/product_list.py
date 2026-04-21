@@ -22,11 +22,12 @@ class ProductListFrame(ctk.CTkFrame):
         self.finance_service = finance_service
         self.refresh_callback = refresh_callback
 
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(3, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
         # Filtres actuels
         self.current_filter = None
+        self.current_category_filter = "Toutes les catégories"
         self.search_query = ""
 
         self._create_ui()
@@ -61,28 +62,60 @@ class ProductListFrame(ctk.CTkFrame):
         search_entry.pack(side="left", padx=(0, 10))
         self.search_var.trace("w", lambda *args: self.refresh())
 
-        # Boutons de filtre
-        filter_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
-        filter_frame.grid(row=0, column=2, sticky="e", padx=(20, 0))
+        # === FILTRES PAR STATUT ===
+        status_filter_frame = ctk.CTkFrame(self, fg_color="transparent")
+        status_filter_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=(0, 10))
 
-        for status, label in [("STOCK", "En Stock"), ("EN_VENTE", "En Vente"), ("VENDU", "Vendus"), (None, "Tous")]:
+        status_label = ctk.CTkLabel(
+            status_filter_frame,
+            text="Statut:",
+            font=("Arial", 11, "bold"),
+            text_color=config.COLORS["fg_text"]
+        )
+        status_label.pack(side="left", padx=(0, 10))
+
+        for status, label in [("STOCK", "📦 Stock"), ("EN_VENTE", "🔄 Vente"), ("EN_LIVRAISON", "🚚 Livraison"), ("RESERVE", "⭐ Réservé"), ("VENDU", "✓ Vendu"), (None, "Tous")]:
             btn = ctk.CTkButton(
-                filter_frame,
+                status_filter_frame,
                 text=label,
                 command=lambda s=status: self._set_filter(s),
                 fg_color=config.COLORS["bg_secondary"],
                 hover_color=config.COLORS["accent"],
-                font=("Arial", 10),
+                font=("Arial", 9),
                 height=30
             )
-            btn.pack(side="left", padx=5)
+            btn.pack(side="left", padx=3)
+
+        # === FILTRES PAR CATÉGORIE ===
+        category_filter_frame = ctk.CTkFrame(self, fg_color="transparent")
+        category_filter_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=(0, 15))
+
+        category_label = ctk.CTkLabel(
+            category_filter_frame,
+            text="Catégorie:",
+            font=("Arial", 11, "bold"),
+            text_color=config.COLORS["fg_text"]
+        )
+        category_label.pack(side="left", padx=(0, 10))
+
+        self.category_filter = ctk.CTkComboBox(
+            category_filter_frame,
+            values=["Toutes les catégories"] + config.CATEGORIES,
+            command=self._on_category_filter_change,
+            fg_color=config.COLORS["bg_secondary"],
+            button_color=config.COLORS["accent"],
+            dropdown_fg_color=config.COLORS["bg_secondary"],
+            width=220
+        )
+        self.category_filter.set("Toutes les catégories")
+        self.category_filter.pack(side="left", padx=5)
 
         # === TABLEAU ===
         self.table_frame = ctk.CTkScrollableFrame(
             self,
             fg_color=config.COLORS["bg_primary"]
         )
-        self.table_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 20))
+        self.table_frame.grid(row=3, column=0, sticky="nsew", padx=20, pady=(0, 20))
         self.table_frame.grid_columnconfigure(0, weight=1)
 
         self._refresh_table()
@@ -90,6 +123,11 @@ class ProductListFrame(ctk.CTkFrame):
     def _set_filter(self, status):
         """Change le filtre"""
         self.current_filter = status
+        self.refresh()
+
+    def _on_category_filter_change(self, choice):
+        """Callback du filtre de catégorie"""
+        self.current_category_filter = choice
         self.refresh()
 
     def _refresh_table(self):
@@ -103,6 +141,10 @@ class ProductListFrame(ctk.CTkFrame):
             products = self.product_service.get_products_by_status(self.current_filter)
         else:
             products = self.product_service.get_all_products()
+
+        # Appliquer le filtre de catégorie
+        if self.current_category_filter != "Toutes les catégories":
+            products = [p for p in products if p.category == self.current_category_filter]
 
         # Appliquer la recherche
         if self.search_query:
@@ -211,17 +253,23 @@ class ProductListFrame(ctk.CTkFrame):
         action_frame = ctk.CTkFrame(row_frame, fg_color="transparent")
         action_frame.grid(row=0, column=6, padx=15, pady=10, sticky="e")
 
-        # Bouton changer statut
-        if product.status != "VENDU":
-            btn = ctk.CTkButton(
+        # Menu pour changer le statut
+        status_options = [s for s in config.PRODUCT_STATUS.keys() if s != product.status]
+        if status_options:
+            status_menu_label = "Changer statut"
+            status_menu = ctk.CTkOptionMenu(
                 action_frame,
-                text="✓ Vendre",
+                values=status_options,
+                command=lambda status, p=product: self._change_product_status(p, status),
+                fg_color=config.COLORS["bg_tertiary"],
+                button_color=config.COLORS["accent"],
+                dropdown_fg_color=config.COLORS["bg_secondary"],
                 font=("Arial", 9),
                 height=25,
-                width=70,
-                command=lambda p=product: self._mark_as_sold(p)
+                width=100
             )
-            btn.pack(side="left", padx=5)
+            status_menu.set("Status")
+            status_menu.pack(side="left", padx=3)
 
         # Bouton supprimer
         btn_delete = ctk.CTkButton(
@@ -234,16 +282,21 @@ class ProductListFrame(ctk.CTkFrame):
             hover_color="#991111",
             command=lambda p=product: self._delete_product(p)
         )
-        btn_delete.pack(side="left", padx=5)
+        btn_delete.pack(side="left", padx=3)
 
-    def _mark_as_sold(self, product: Product):
-        """Marque un produit comme vendu"""
-        if self.product_service.change_product_status(product.id, "VENDU"):
-            messagebox.showinfo("Succès", f"{product.name} a été marqué comme vendu!")
+    def _change_product_status(self, product: Product, new_status: str):
+        """Change le statut d'un produit"""
+        if self.product_service.change_product_status(product.id, new_status):
+            status_label = config.PRODUCT_STATUS.get(new_status, new_status)
+            messagebox.showinfo("Succès", f"{product.name} est maintenant {status_label.lower()}!")
             self.refresh()
             self.refresh_callback()
         else:
-            messagebox.showerror("Erreur", "Impossible de marquer le produit comme vendu")
+            messagebox.showerror("Erreur", "Impossible de changer le statut du produit")
+
+    def _mark_as_sold(self, product: Product):
+        """Marque un produit comme vendu (compatible avec ancien code)"""
+        self._change_product_status(product, "VENDU")
 
     def _delete_product(self, product: Product):
         """Supprime un produit"""

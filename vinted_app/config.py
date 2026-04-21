@@ -30,7 +30,9 @@ SIDEBAR_WIDTH = 250
 PRODUCT_STATUS = {
     "STOCK": "En Stock",
     "EN_VENTE": "En Vente",
-    "VENDU": "Vendu"
+    "VENDU": "Vendu",
+    "EN_LIVRAISON": "En Livraison",
+    "RESERVE": "Réservé"
 }
 
 # ====== CATEGORIES ======
@@ -40,6 +42,10 @@ CATEGORIES = [
     "Accessoires",
     "Électronique",
     "Livres",
+    "Jeux vidéo",
+    "Nintendo Switch",
+    "Boîte Switch",
+    "LEGO",
     "Jouets",
     "Décoration",
     "Autre"

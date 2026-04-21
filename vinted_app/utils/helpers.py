@@ -42,9 +42,11 @@ def truncate_text(text: str, max_length: int = 50) -> str:
 def get_status_color(status: str) -> str:
     """Retourne la couleur correspondant au statut"""
     colors = {
-        "STOCK": "#6B7280",        # Gris
-        "EN_VENTE": "#F59E0B",     # Orange
-        "VENDU": "#22C55E"         # Vert
+        "STOCK": "#6B7280",        # Gris - En Stock
+        "EN_VENTE": "#F59E0B",     # Orange - En Vente
+        "VENDU": "#22C55E",        # Vert - Vendu
+        "EN_LIVRAISON": "#3B82F6", # Bleu - En Livraison
+        "RESERVE": "#A855F7"       # Violet - Réservé
     }
     return colors.get(status, "#3B82F6")
 
@@ -54,6 +56,8 @@ def get_status_label(status: str) -> str:
     labels = {
         "STOCK": "En Stock",
         "EN_VENTE": "En Vente",
-        "VENDU": "Vendu"
+        "VENDU": "Vendu",
+        "EN_LIVRAISON": "En Livraison",
+        "RESERVE": "Réservé"
     }
     return labels.get(status, status)
