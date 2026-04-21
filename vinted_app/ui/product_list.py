@@ -308,6 +308,32 @@ class ProductListFrame(ctk.CTkFrame):
         )
         btn_delete.pack(side="left", padx=3)
         
+        # Bouton modifier
+        btn_edit = ctk.CTkButton(
+            action_frame,
+            text="✏",
+            font=("Arial", 10, "bold"),
+            height=28,
+            width=28,
+            fg_color=config.COLORS["info"],
+            hover_color="#0891B2",
+            command=lambda p=product: self._edit_product(p)
+        )
+        btn_edit.pack(side="left", padx=3)
+
+        # Bouton modifier
+        btn_edit = ctk.CTkButton(
+            action_frame,
+            text="✏",
+            font=("Arial", 10, "bold"),
+            height=28,
+            width=28,
+            fg_color=config.COLORS["info"],
+            hover_color="#0891B2",
+            command=lambda p=product: self._edit_product(p)
+        )
+        btn_edit.pack(side="left", padx=3)
+        
         # Effet hover sur la ligne
         def on_enter(e):
             row_frame.configure(fg_color=config.COLORS["bg_tertiary"])
@@ -348,6 +374,13 @@ class ProductListFrame(ctk.CTkFrame):
             self.refresh_callback()
         else:
             self._show_feedback("Impossible de supprimer le produit", "danger")
+
+    def _edit_product(self, product: Product):
+        """Ouvre la fenêtre d'édition pour un produit"""
+        print(f"[DEBUG] Ouverture de l'édition pour {product.name} (ID: {product.id})")
+        # Cette méthode sera appelée depuis main_window.py pour ouvrir l'onglet d'ajout en mode édition
+        # Pour l'instant, on affiche un feedback
+        self._show_feedback(f"Édition de {product.name} - Fonctionnalité à implémenter", "info")
 
     def _show_feedback(self, message: str, type_: str = "info"):
         """Affiche un message de feedback temporaire"""
