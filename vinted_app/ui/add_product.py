@@ -168,6 +168,22 @@ class AddProductFrame(ctk.CTkFrame):
 
         entry.grid(row=row, column=1, sticky="ew", pady=(18, 8), padx=12)
 
+    def _calculate_profit(self):
+        """Calcule le bénéfice estimé"""
+        try:
+            selling = float(self.selling_price_var.get() or 0)
+            purchase = float(self.purchase_price_var.get() or 0)
+            fees = float(self.fees_var.get() or 0)
+
+            profit = selling - purchase - fees
+            margin = (profit / selling * 100) if selling > 0 else 0
+
+            self.profit_label.configure(
+                text=f"💰 Bénéfice estimé: {profit:.2f}€ | Marge: {margin:.2f}%"
+            )
+        except ValueError:
+            self.profit_label.configure(text="⚠ Entrez des chiffres valides")
+
     def _show_feedback(self, message: str, type_: str = "info"):
         """Affiche un message de feedback temporaire"""
         color_map = {
