@@ -181,7 +181,8 @@ class AddProductFrame(ctk.CTkFrame):
 
             # Binding spécial pour la catégorie (gestion PEGI)
             if var_name == "category":
-                entry.configure(command=self._on_category_change)
+                # Utiliser trace pour détecter les changements
+                getattr(self, f"{var_name}_var").trace("w", lambda *args: self._on_category_change(getattr(self, f"{var_name}_var").get()))
 
         else:
             entry = ctk.CTkEntry(
@@ -287,9 +288,14 @@ class AddProductFrame(ctk.CTkFrame):
 
     def _on_category_change(self, choice):
         """Gère le changement de catégorie pour afficher/cacher PEGI"""
+        print(f"[DEBUG] Changement de catégorie: '{choice}', PEGI categories: {self.pegi_categories}")
+        if not choice or choice == "":
+            return
         if choice in self.pegi_categories:
+            print("[DEBUG] Affichage du champ PEGI")
             self.pegi_frame.grid()
         else:
+            print("[DEBUG] Masquage du champ PEGI")
             self.pegi_frame.grid_remove()
             self.pegi_var.set("")
 
@@ -324,6 +330,7 @@ class AddProductFrame(ctk.CTkFrame):
     def _add_product(self):
         """Ajoute un produit"""
         try:
+            print("[DEBUG] Début ajout de produit")
             # Validation
             name = self.name_var.get().strip()
             if not name:
@@ -365,6 +372,8 @@ class AddProductFrame(ctk.CTkFrame):
             pegi_str = self.pegi_var.get()
             pegi = int(pegi_str) if pegi_str and pegi_str.isdigit() else None
 
+            print(f"[DEBUG] Création produit: {name}, catégorie: {category}, PEGI: {pegi}")
+
             # Créer le produit
             product_id = self.product_service.create_product(
                 name=name,
@@ -380,8 +389,11 @@ class AddProductFrame(ctk.CTkFrame):
                 description=description
             )
 
+            print(f"[DEBUG] Produit créé avec ID: {product_id}")
+
             # Mettre à jour le PEGI si nécessaire
             if pegi is not None:
+                print(f"[DEBUG] Mise à jour PEGI: {pegi}")
                 self.product_service.update_product(product_id, pegi=pegi)
 
             if product_id:

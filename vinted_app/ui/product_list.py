@@ -190,6 +190,11 @@ class ProductListFrame(ctk.CTkFrame):
             for idx, product in enumerate(products, 1):
                 self._create_product_row(self.table_frame, idx, product)
 
+    def refresh(self):
+        """Rafraîchit la liste des produits"""
+        print(f"[DEBUG] Rafraîchissement de la liste des produits")
+        self._refresh_table()
+
     def _create_product_row(self, parent, row, product: Product):
         """Crée une ligne de produit stylisée"""
         row_frame = ctk.CTkFrame(
@@ -314,6 +319,7 @@ class ProductListFrame(ctk.CTkFrame):
 
     def _change_product_status(self, product: Product, new_status: str):
         """Change le statut d'un produit"""
+        print(f"[DEBUG] Changement de statut pour {product.name} (ID: {product.id}) vers {new_status}")
         if self.product_service.change_product_status(product.id, new_status):
             status_label = config.PRODUCT_STATUS.get(new_status, new_status)
             self._show_feedback(f"{product.name} est maintenant {status_label.lower()}", "success")
@@ -328,12 +334,14 @@ class ProductListFrame(ctk.CTkFrame):
 
     def _delete_product(self, product: Product):
         """Supprime un produit"""
+        print(f"[DEBUG] Suppression du produit {product.name} (ID: {product.id})")
         # Confirmation simple via feedback temporaire
         self._show_feedback(f"Suppression de {product.name}...", "warning")
         self.after(1000, lambda: self._confirm_delete(product))
 
     def _confirm_delete(self, product: Product):
         """Confirme la suppression après un délai"""
+        print(f"[DEBUG] Confirmation suppression pour {product.name} (ID: {product.id})")
         if self.product_service.delete_product(product.id):
             self._show_feedback(f"{product.name} a été supprimé", "success")
             self.refresh()
