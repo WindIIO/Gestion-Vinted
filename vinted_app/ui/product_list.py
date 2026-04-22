@@ -7,6 +7,7 @@ from vinted_app.services.finance_service import FinanceService
 from vinted_app.database.models import Product
 from vinted_app import config
 from vinted_app.utils.helpers import format_currency, get_status_color, get_status_label
+from vinted_app.ui.edit_product import EditProductWindow
 
 
 class ProductListFrame(ctk.CTkFrame):
@@ -311,10 +312,9 @@ class ProductListFrame(ctk.CTkFrame):
         # Bouton modifier
         btn_edit = ctk.CTkButton(
             action_frame,
-            text="✏",
-            font=("Arial", 10, "bold"),
+            text="✏ Modifier",
+            font=("Arial", 9, "bold"),
             height=28,
-            width=28,
             fg_color=config.COLORS["info"],
             hover_color="#0891B2",
             command=lambda p=product: self._edit_product(p)
@@ -378,9 +378,8 @@ class ProductListFrame(ctk.CTkFrame):
     def _edit_product(self, product: Product):
         """Ouvre la fenêtre d'édition pour un produit"""
         print(f"[DEBUG] Ouverture de l'édition pour {product.name} (ID: {product.id})")
-        # Cette méthode sera appelée depuis main_window.py pour ouvrir l'onglet d'ajout en mode édition
-        # Pour l'instant, on affiche un feedback
-        self._show_feedback(f"Édition de {product.name} - Fonctionnalité à implémenter", "info")
+        # Ouvrir la fenêtre d'édition modale
+        EditProductWindow(self, self.product_service, product, self.refresh)
 
     def _show_feedback(self, message: str, type_: str = "info"):
         """Affiche un message de feedback temporaire"""
@@ -393,3 +392,7 @@ class ProductListFrame(ctk.CTkFrame):
         self.feedback_label.configure(text=message, text_color=color_map.get(type_, config.COLORS["fg_text"]))
         # Effacer après 3 secondes
         self.after(3000, lambda: self.feedback_label.configure(text=""))
+
+    def refresh(self):
+        """Actualise la liste des produits"""
+        self._refresh_table()
