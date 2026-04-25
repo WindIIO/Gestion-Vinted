@@ -1,55 +1,56 @@
 # Vinted Stock Manager 📊
 
-Application de gestion de stock pour achat/revente Vinted avec interface graphique moderne.
+Stock management application for Vinted buying/selling with a modern graphical interface.
 
-## 🚀 Installation
+---
 
-### Prérequis
+## Features
+
+- Dashboard with KPIs and statistics
+- Complete product management (add, edit, delete)
+- Automatic financial calculations
+- Modern and intuitive interface
+
+## Installation
+
+### Prerequisites
 
 - Python 3.8+
 - pip
 
-### Installation rapide
+### Quick Installation
 
 ```bash
-# Créer environnement virtuel
+# Create virtual environment
 python -m venv .venv
 
-# Activer (Windows)
+# Activate (Windows)
 .venv\Scripts\activate
 
-# Installer dépendances
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-## ▶️ Lancement
+## Usage
 
-### Via launcher (recommandé)
+### Via launcher (recommended)
 
-Double-cliquez sur `launch.bat`
+Double-click `launch.bat`
 
-### Manuellement
+### Manually
 
 ```bash
 python -m vinted_app.main
 ```
 
-## 📋 Fonctionnalités
-
-- Dashboard avec KPIs et statistiques
-- Gestion complète des produits (ajout, modification, suppression)
-- Calculs financiers automatiques
-- Interface moderne et intuitive
-
-## 📦 Dépendances
+## Technologies Used
 
 - customtkinter>=5.0.0
-- [ ] Notifications de prix
 
-## 📝 Licence
+## License
 
-Libre d'utilisation pour usage personnel
+Free for personal use
 
-## 👨‍💻 Auteur
+## Author
 
-Créé avec ❤️ pour la gestion simplifiée du stock Vinted
+Created with ❤️ for simplified Vinted stock management
